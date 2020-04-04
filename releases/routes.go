@@ -1,4 +1,4 @@
-package runner
+package releases
 
 import (
 	"github.com/gin-gonic/gin"
@@ -6,9 +6,8 @@ import (
 
 // InitializeRoutes initializes the router with handlers
 func InitializeRoutes(router *gin.Engine) {
-	v1 := router.Group("/runner/v1")
+	v1 := router.Group("/releases/v1")
 	{
-		v1.GET("/status", statusResponseHandler)
-		v1.POST("/start", startResponseHander)
+		v1.POST("/update", githubResponseHandler)
 	}
 }
