@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/docker/distribution/uuid"
+	"github.com/jhoonb/archivex"
 
 	"github.com/gin-gonic/gin"
 )
@@ -77,8 +78,26 @@ func startResponseHander(c *gin.Context) {
 		return
 	}
 
+	// Compress flow directory
+	compressedFlow := path.Join(flowDir, runDir.String()+".tar")
+	tar := new(archivex.TarFile)
+	tar.Create(compressedFlow)
+	tar.AddAll(path.Join(flowDir, runDir.String()), true)
+	tar.Close()
+
+	// Upload flow to bucket
+	_, urlString, err := createBucket(runDir.String(), compressedFlow)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": fmt.Sprintf("couldn't reserve storage for the flow: %s", err.Error()),
+		})
+		return
+	}
+
+	// TODO: run flow
+
 	c.JSON(http.StatusOK, gin.H{
-		"result_url": "http://<not-ready-yet>",
+		"result_url": urlString,
 		"message":    "OpenROAD flow has started. Check result_url!",
 	})
 }
