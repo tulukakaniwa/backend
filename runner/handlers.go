@@ -42,13 +42,22 @@ func startResponseHander(c *gin.Context) {
 		})
 		return
 	}
-	if dieArea := c.PostForm("die_area"); dieArea == "" {
+	designName := c.PostForm("design_name")
+	if designName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": fmt.Sprintf("missing design_name"),
+		})
+		return
+	}
+	dieArea := c.PostForm("die_area")
+	if dieArea == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": fmt.Sprintf("missing die_area"),
 		})
 		return
 	}
-	if coreArea := c.PostForm("core_area"); coreArea == "" {
+	coreArea := c.PostForm("core_area")
+	if coreArea == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": fmt.Sprintf("missing core_area"),
 		})
@@ -78,6 +87,23 @@ func startResponseHander(c *gin.Context) {
 		return
 	}
 
+	// Create flow parameters
+	filename = path.Join(flowDir, runDir.String(), "config.mk")
+	params := flowParams{
+		DesignName:   designName,
+		VerilogFiles: path.Join("/cloud", designFile.Filename),
+		SdcFile:      path.Join("/cloud", sdcFile.Filename),
+		DieArea:      dieArea,
+		CoreArea:     coreArea,
+	}
+	err = createConfigFile(filename, params)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": fmt.Sprintf("couldn't create flow config file: %s", err.Error()),
+		})
+		return
+	}
+
 	// Compress flow directory
 	compressedFlow := path.Join(flowDir, runDir.String()+".tar")
 	tar := new(archivex.TarFile)
@@ -95,7 +121,6 @@ func startResponseHander(c *gin.Context) {
 	}
 
 	// TODO: run flow
-
 	c.JSON(http.StatusOK, gin.H{
 		"result_url": urlString,
 		"message":    "OpenROAD flow has started. Check result_url!",
