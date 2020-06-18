@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/docker/distribution/uuid"
-	"github.com/jhoonb/archivex"
 
 	"github.com/gin-gonic/gin"
 )
@@ -105,11 +104,7 @@ func startResponseHander(c *gin.Context) {
 	}
 
 	// Compress flow directory
-	compressedFlow := path.Join(flowDir, runDir.String()+".tar")
-	tar := new(archivex.TarFile)
-	tar.Create(compressedFlow)
-	tar.AddAll(path.Join(flowDir, runDir.String()), true)
-	tar.Close()
+	compressedFlow := compressFlow(path.Join(flowDir, runDir.String()))
 
 	// Upload flow to bucket
 	_, urlString, err := createBucket(runDir.String(), compressedFlow)
@@ -120,9 +115,11 @@ func startResponseHander(c *gin.Context) {
 		return
 	}
 
-	// TODO: run flow
+	// Run flow
+	go runFlow(path.Join(flowDir, runDir.String()), runDir.String())
+
 	c.JSON(http.StatusOK, gin.H{
 		"result_url": urlString,
-		"message":    "OpenROAD flow has started. Check result_url!",
+		"message":    fmt.Sprintf("OpenROAD flow has started. Check %s!", urlString),
 	})
 }
