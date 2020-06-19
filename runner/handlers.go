@@ -120,6 +120,6 @@ func startResponseHander(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"result_url": urlString,
-		"message":    fmt.Sprintf("OpenROAD flow has started. Check %s!", urlString),
+		"message":    fmt.Sprintf("OpenROAD flow has started!"),
 	})
 }

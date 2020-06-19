@@ -50,7 +50,7 @@ func createBucket(name string, compressedFlow string) (*s3.CreateBucketOutput, s
 		Bucket: aws.String(name),
 		Key:    aws.String("openroad-flow.tar"),
 	})
-	urlString, err := req.Presign(48 * time.Hour)
+	urlString, err := req.Presign(7 * 24 * time.Hour)
 	if err != nil {
 		log.Printf("error signing the URL: %s", err.Error())
 		return nil, "", err

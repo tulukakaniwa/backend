@@ -84,6 +84,11 @@ func runFlow(flowDir string, bucketName string) {
 		log.Printf("Flow %s falied: %s", bucketName, e)
 	case <-waitChan:
 		log.Printf("Flow %s finished!", bucketName)
+
+		// Remove container
+		cli.ContainerRemove(ctx, bucketName, types.ContainerRemoveOptions{})
+
+		// Upload flow directory
 		compressedFlow := compressFlow(flowDir)
 		err := uploadFlowDir(bucketName, compressedFlow)
 		if err != nil {
