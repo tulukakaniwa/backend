@@ -54,6 +54,7 @@ func runFlow(flowDir string, bucketName string) {
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
+		log.Printf("Flow %s failed to connect to Docker engine: %s", bucketName, err.Error())
 		return
 	}
 	cli.NegotiateAPIVersion(ctx)
@@ -70,10 +71,12 @@ func runFlow(flowDir string, bucketName string) {
 		},
 	}, nil, nil, bucketName)
 	if err != nil {
+		log.Printf("Flow %s container failed to create: %s", bucketName, err.Error())
 		return
 	}
 
 	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		log.Printf("Flow %s container failed to start: %s", bucketName, err.Error())
 		return
 	}
 
