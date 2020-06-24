@@ -32,7 +32,7 @@ func startResponseHander(c *gin.Context) {
 	callbackURL = c.PostForm("callback_url")
 	if callbackURL == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": fmt.Sprintf("missin callback_url"),
+			"error": fmt.Sprintf("missing callback_url"),
 		})
 		return
 	}
