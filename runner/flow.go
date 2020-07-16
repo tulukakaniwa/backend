@@ -154,7 +154,12 @@ func startFlow(flowUUID string, repoURL string, callbackURL string) {
 	loadEnv()
 
 	// Create a directory for this run
-	_ = os.MkdirAll(path.Join(flowDir, flowUUID), os.ModePerm)
+	err := os.MkdirAll(path.Join(flowDir, flowUUID), os.ModePerm)
+	if err != nil {
+		log.Printf("Couldn't create a flow directory: %s", err.Error())
+		go notifyFlowFail(flowUUID, err.Error())
+		return
+	}
 
 	// clone repo
 	cloned := cloneRepo(repoURL, path.Join(flowDir, flowUUID, "repo"))

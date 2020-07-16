@@ -23,15 +23,15 @@ func createBucket(name string, compressedFlow string) (*s3.CreateBucketOutput, s
 	svc := s3.New(sess)
 
 	// Create bucket
-	bucket, err := svc.CreateBucket(&s3.CreateBucketInput{
-		Bucket: aws.String(name),
+	_, err = svc.CreateBucket(&s3.CreateBucketInput{
+		Bucket: aws.String("openroad-cloud"),
 	})
 	if err != nil {
 		log.Printf("error creating bucket: %s", err.Error())
 		return nil, "", err
 	}
 	err = svc.WaitUntilBucketExists(&s3.HeadBucketInput{
-		Bucket: aws.String(name),
+		Bucket: aws.String("openroad-cloud"),
 	})
 	if err != nil {
 		log.Printf("error while waiting for bucket creattion: %s", err.Error())
@@ -47,15 +47,15 @@ func createBucket(name string, compressedFlow string) (*s3.CreateBucketOutput, s
 
 	// Generate URL
 	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String(name),
-		Key:    aws.String("openroad-flow.tar"),
+		Bucket: aws.String("openroad-cloud"),
+		Key:    aws.String(name + ".tar"),
 	})
 	urlString, err := req.Presign(7 * 24 * time.Hour)
 	if err != nil {
 		log.Printf("error signing the URL: %s", err.Error())
 		return nil, "", err
 	}
-	return bucket, urlString, nil
+	return nil, urlString, nil
 }
 
 func uploadFlowDir(bucketName string, compressedFlow string) error {
@@ -77,8 +77,8 @@ func uploadFlowDir(bucketName string, compressedFlow string) error {
 	defer file.Close()
 	uploader := s3manager.NewUploader(sess)
 	_, err = uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String("openroad-flow.tar"),
+		Bucket: aws.String("openroad-cloud"),
+		Key:    aws.String(bucketName + ".tar"),
 		Body:   file,
 	})
 	if err != nil {
