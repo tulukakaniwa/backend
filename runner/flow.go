@@ -174,7 +174,7 @@ func startFlow(flowUUID string, repoURL string, callbackURL string) {
 		errorMessage := fmt.Sprintf("Couldn't read openroad.yml for flow %s: %s", flowUUID, err.Error())
 		log.Println(errorMessage)
 		go notifyFlowFail(flowUUID, errorMessage)
-
+		return // make sure this error is properly handled.
 	}
 	conf.DesignFiles = designFilesMap(conf.DesignFiles, func(f string) string {
 		return "/cloud/repo/" + f
